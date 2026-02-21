@@ -1,0 +1,109 @@
+# Dependencies
+node_modules/
+/.pnp
+.pnp.js
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Testing
+/coverage
+.nyc_output
+
+# Next.js
+/.next/
+/out/
+.next/
+out/
+
+# Production
+/build
+/dist
+build/
+dist/
+
+# Misc
+.DS_Store
+*.pem
+*.key
+*.cert
+*.crt
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Local env files (CRITICAL - Never commit these!)
+.env*.local
+.env.local
+.env
+.env.development.local
+.env.test.local
+.env.production.local
+.env.development
+.env.test
+.env.production
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.cursor/
+
+# Uploads (User-generated content - don't commit)
+uploads/
+public/uploads/
+server/uploads/
+client/public/uploads/
+
+# Logs
+logs/
+*.log
+*.log.*
+
+# OS Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+.temp/
+
+# Database files (if any local databases exist)
+*.db
+*.sqlite
+*.sqlite3
+
+# Secrets and credentials (extra safety)
+*.secret
+*.credentials
+secrets/
+.secrets/
+
+# Documentation (exclude from repo)
+docss/
+
+# Setup/helper files (local development only)
+PRE_GITHUB_CHECKLIST.md
+STEP_BY_STEP_GUIDE.md
+setup-github-repo.sh
+check-before-push.sh
