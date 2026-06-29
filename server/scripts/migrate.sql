@@ -61,6 +61,21 @@ CREATE TABLE IF NOT EXISTS item_images (
   sort_order INTEGER DEFAULT 1
 );
 
+-- Seller payment details table
+CREATE TABLE IF NOT EXISTS seller_payment_details (
+  payment_detail_id SERIAL PRIMARY KEY,
+  seller_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+  bank_account_holder_name VARCHAR(255),
+  bank_account_number VARCHAR(50),
+  bank_ifsc VARCHAR(20),
+  bank_name VARCHAR(100),
+  upi_id VARCHAR(100),
+  qr_code_url VARCHAR(500),
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(seller_id)
+);
+
 -- Transactions table
 CREATE TABLE IF NOT EXISTS transactions (
   transaction_id SERIAL PRIMARY KEY,
@@ -69,7 +84,7 @@ CREATE TABLE IF NOT EXISTS transactions (
   transaction_type VARCHAR(20) NOT NULL CHECK (transaction_type IN ('Purchase', 'Rental')),
   quantity INTEGER DEFAULT 1,
   total_amount DECIMAL(10, 2) NOT NULL,
-  payment_method VARCHAR(20) NOT NULL CHECK (payment_method IN ('Cash', 'BankAccount', 'UPI', 'QRCode')),
+  payment_method VARCHAR(30) NOT NULL CHECK (payment_method IN ('Cash', 'BankAccount', 'UPI', 'QRCode')),
   payment_status VARCHAR(20) NOT NULL CHECK (payment_status IN ('Pending', 'Paid', 'Failed', 'AwaitingVerification')),
   rental_start_date DATE,
   rental_end_date DATE,
@@ -107,6 +122,7 @@ CREATE INDEX IF NOT EXISTS idx_transactions_item ON transactions(item_id);
 CREATE INDEX IF NOT EXISTS idx_messages_conversation ON messages(conversation_id);
 CREATE INDEX IF NOT EXISTS idx_messages_sender ON messages(sender_id);
 CREATE INDEX IF NOT EXISTS idx_conversations_users ON conversations(user1_id, user2_id);
+CREATE INDEX IF NOT EXISTS idx_seller_payment_details_seller ON seller_payment_details(seller_id);
 
 -- ============================================
 -- Migration Complete!

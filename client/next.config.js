@@ -9,19 +9,24 @@ const nextConfig = {
         port: '5000',
         pathname: '/uploads/**',
       },
-      // Add your production backend domain here
-      // Example for Railway:
-      // {
-      //   protocol: 'https',
-      //   hostname: 'your-app.railway.app',
-      //   pathname: '/uploads/**',
-      // },
-      // Example for Render:
-      // {
-      //   protocol: 'https',
-      //   hostname: 'your-app.onrender.com',
-      //   pathname: '/uploads/**',
-      // },
+      // Railway production backend
+      {
+        protocol: 'https',
+        hostname: '*.railway.app',
+        pathname: '/uploads/**',
+      },
+      // Render production backend
+      {
+        protocol: 'https',
+        hostname: '*.onrender.com',
+        pathname: '/uploads/**',
+      },
+      // Generic HTTPS backend support
+      {
+        protocol: 'https',
+        hostname: '**',
+        pathname: '/uploads/**',
+      },
     ],
   },
   env: {

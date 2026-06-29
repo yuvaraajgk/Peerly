@@ -86,9 +86,7 @@ Thumbs.db
 *.tmp
 *.temp
 .cache/
-.temp/
-
-# Database files (if any local databases exist)
+.temp/# Database files (if any local databases exist)
 *.db
 *.sqlite
 *.sqlite3
