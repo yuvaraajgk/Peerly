@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Navbar } from '@/components/common/Navbar'
 import { useAuth } from '@/contexts/AuthContext'
@@ -65,7 +65,7 @@ const isDifferentDay = (date1: Date, date2: Date): boolean => {
   return d1.getTime() !== d2.getTime()
 }
 
-export default function MessagesPage() {
+function MessagesContent() {
   const { user } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -429,5 +429,20 @@ export default function MessagesPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function MessagesPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-surface">
+        <Navbar />
+        <div className="max-w-6xl mx-auto px-4 py-16 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+        </div>
+      </div>
+    }>
+      <MessagesContent />
+    </Suspense>
   )
 }
