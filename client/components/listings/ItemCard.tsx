@@ -29,12 +29,11 @@ export function ItemCard({ item }: ItemCardProps) {
     }
   }
 
-  // Get API base URL (remove /api suffix for static files)
+  // strip /api for static files
   const getImageUrl = (thumbnail: string | null) => {
     if (!thumbnail) return null
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'
     const baseUrl = apiUrl.replace('/api', '')
-    // Ensure thumbnail starts with /
     const thumbnailPath = thumbnail.startsWith('/') ? thumbnail : `/${thumbnail}`
     return `${baseUrl}${thumbnailPath}`
   }
@@ -59,7 +58,6 @@ export function ItemCard({ item }: ItemCardProps) {
               No Image
             </div>
           )}
-          {/* Transaction Type Badge */}
           <div className="absolute top-2 left-2 flex gap-2">
             {item.isForSale && (
               <span className="px-2 py-1 bg-primary text-white text-xs font-semibold rounded shadow-md">

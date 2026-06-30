@@ -3,7 +3,6 @@ const nodemailer = require('nodemailer')
 let transporter
 
 if (process.env.EMAIL_SERVICE === 'sendgrid') {
-  // SendGrid configuration
   transporter = nodemailer.createTransport({
     service: 'SendGrid',
     auth: {
@@ -12,7 +11,6 @@ if (process.env.EMAIL_SERVICE === 'sendgrid') {
     },
   })
 } else {
-  // SMTP configuration
   transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
     port: process.env.SMTP_PORT || 587,

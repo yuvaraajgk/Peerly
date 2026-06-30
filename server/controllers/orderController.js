@@ -5,7 +5,6 @@ exports.createOrder = async (req, res) => {
     const { itemId, transactionType, rentalDays, paymentMethod } = req.body
     const buyerId = req.user.user_id
 
-    // Fetch item details using Supabase
     const { data: itemData, error: itemError } = await supabase
       .from('items')
       .select('*')
@@ -17,7 +16,6 @@ exports.createOrder = async (req, res) => {
       return res.status(404).json({ message: 'Item not available' })
     }
 
-    // Validate transaction type
     if (transactionType === 'Purchase' && !itemData.is_for_sale) {
       return res.status(400).json({ message: 'Item is not for sale' })
     }
@@ -26,7 +24,6 @@ exports.createOrder = async (req, res) => {
       return res.status(400).json({ message: 'Item is not for rent' })
     }
 
-    // Calculate total amount
     let totalAmount = 0
     let rentalStartDate = null
     let rentalEndDate = null
@@ -44,10 +41,6 @@ exports.createOrder = async (req, res) => {
       rentalEndDate = endDate.toISOString().split('T')[0]
     }
 
-    // Handle payment - cash only
-    let paymentStatus = 'Pending'
-
-    // Create transaction using Supabase
     const { data: transactionData, error: transactionError } = await supabase
       .from('transactions')
       .insert({
@@ -57,7 +50,7 @@ exports.createOrder = async (req, res) => {
         quantity: transactionType === 'Rental' ? rentalDays : 1,
         total_amount: totalAmount,
         payment_method: paymentMethod,
-        payment_status: paymentStatus,
+        payment_status: 'Pending',
         rental_start_date: rentalStartDate,
         rental_end_date: rentalEndDate,
       })
@@ -87,12 +80,10 @@ exports.createOrder = async (req, res) => {
   }
 }
 
-
 exports.getMyOrders = async (req, res) => {
   try {
     const buyerId = req.user.user_id
 
-    // Fetch transactions with related data using Supabase
     const { data: transactionsData, error: transactionsError } = await supabase
       .from('transactions')
       .select(`
@@ -119,7 +110,6 @@ exports.getMyOrders = async (req, res) => {
       return res.status(500).json({ message: 'Failed to fetch orders' })
     }
 
-    // Transform data
     const orders = (transactionsData || []).map((transaction) => {
       const item = Array.isArray(transaction.items) ? transaction.items[0] : transaction.items
       const seller = Array.isArray(item?.users) ? item.users[0] : item?.users
@@ -158,7 +148,6 @@ exports.deleteOrder = async (req, res) => {
     const { id } = req.params
     const buyerId = req.user.user_id
 
-    // Verify transaction exists and user is the buyer
     const { data: transactionData, error: fetchError } = await supabase
       .from('transactions')
       .select('buyer_id')
@@ -169,12 +158,10 @@ exports.deleteOrder = async (req, res) => {
       return res.status(404).json({ message: 'Order not found' })
     }
 
-    // Only buyer can delete their own order
     if (transactionData.buyer_id !== buyerId) {
       return res.status(403).json({ message: 'Not authorized' })
     }
 
-    // Delete transaction using Supabase
     const { error: deleteError } = await supabase
       .from('transactions')
       .delete()
@@ -197,7 +184,6 @@ exports.updateTransactionStatus = async (req, res) => {
     const { id } = req.params
     const { transactionStatus } = req.body
 
-    // Verify transaction exists and user is seller using Supabase
     const { data: transactionData, error: fetchError } = await supabase
       .from('transactions')
       .select(`
@@ -216,12 +202,10 @@ exports.updateTransactionStatus = async (req, res) => {
 
     const item = Array.isArray(transactionData.items) ? transactionData.items[0] : transactionData.items
 
-    // Only seller can update status
     if (item.seller_id !== req.user.user_id) {
       return res.status(403).json({ message: 'Not authorized' })
     }
 
-    // Update transaction status using Supabase
     const { error: updateError } = await supabase
       .from('transactions')
       .update({ transaction_status: transactionStatus })
@@ -232,7 +216,7 @@ exports.updateTransactionStatus = async (req, res) => {
       return res.status(500).json({ message: 'Failed to update transaction status' })
     }
 
-    // If completed, ensure item status is updated
+    // sync item status on completion
     if (transactionStatus === 'Completed') {
       const status = item.transaction_type === 'Rental' ? 'Rented' : 'Sold'
       await supabase

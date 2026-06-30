@@ -32,7 +32,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter()
 
   useEffect(() => {
-    // Check for stored token and validate
     const token = localStorage.getItem('token')
     if (token) {
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`
@@ -65,7 +64,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signup = async (email: string, displayName: string, password: string) => {
     await api.post('/auth/signup', { email, displayName, password })
-    // User will need to verify email before login
   }
 
   const verifyEmail = async (token: string) => {
@@ -76,13 +74,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const googleAuth = async (credential: string, isSignup: boolean = false) => {
     const response = await api.post('/auth/google', { credential, isSignup })
     const { token, user, needsUsername, userId, isExistingUser } = response.data
-    
-    // If existing user trying to sign up, return flag without logging in
+
     if (isExistingUser) {
       return { isExistingUser: true, needsUsername: false }
     }
     
-    // Store token and user info
     if (token) {
       localStorage.setItem('token', token)
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`
@@ -92,12 +88,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(user)
     }
     
-    // If user needs username, return that info
     if (needsUsername && userId) {
       return { needsUsername: true, userId }
     }
     
-    // User is fully authenticated, redirect to dashboard
     if (token && user) {
       router.push('/dashboard')
     }

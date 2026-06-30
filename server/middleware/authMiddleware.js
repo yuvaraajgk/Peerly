@@ -11,7 +11,6 @@ const authMiddleware = async (req, res, next) => {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET)
     
-    // Fetch user from Supabase database
     const { data: users, error } = await supabase
       .from('users')
       .select('user_id, college_email, display_name, username, is_verified')
@@ -22,8 +21,6 @@ const authMiddleware = async (req, res, next) => {
     if (error || !users) {
       return res.status(401).json({ message: 'User not found' })
     }
-
-    // Google OAuth users are automatically verified, so we don't need to check is_verified
 
     req.user = users
     next()

@@ -4,7 +4,6 @@ exports.getConversations = async (req, res) => {
   try {
     const userId = req.user.user_id
 
-    // Fetch conversations where user is participant
     const { data: conversationsData, error: conversationsError } = await supabase
       .from('conversations')
       .select(`
@@ -26,14 +25,12 @@ exports.getConversations = async (req, res) => {
       return res.status(500).json({ message: 'Failed to fetch conversations' })
     }
 
-    // For each conversation, get last message and unread count
     const conversationsWithDetails = await Promise.all(
       (conversationsData || []).map(async (conv) => {
         const item = Array.isArray(conv.items) ? conv.items[0] : conv.items
         const user1 = Array.isArray(conv.user1) ? conv.user1[0] : conv.user1
         const user2 = Array.isArray(conv.user2) ? conv.user2[0] : conv.user2
 
-        // Get last message
         const { data: lastMessageData } = await supabase
           .from('messages')
           .select('message_content, sent_at')
@@ -42,7 +39,6 @@ exports.getConversations = async (req, res) => {
           .limit(1)
           .single()
 
-        // Get unread count
         const { count: unreadCount } = await supabase
           .from('messages')
           .select('*', { count: 'exact', head: true })
@@ -57,7 +53,7 @@ exports.getConversations = async (req, res) => {
           conversationId: conv.conversation_id,
           itemId: conv.item_id,
           itemTitle: item?.title || null,
-          thumbnail: null, // Can be added if needed
+          thumbnail: null,
           otherUserId,
           otherUserName: otherUserName || null,
           lastMessage: lastMessageData?.message_content || null,
@@ -68,7 +64,6 @@ exports.getConversations = async (req, res) => {
       })
     )
 
-    // Sort by last message time
     conversationsWithDetails.sort((a, b) => {
       if (!a.lastMessageTime) return 1
       if (!b.lastMessageTime) return -1
@@ -87,16 +82,14 @@ exports.getOrCreateConversation = async (req, res) => {
     const { itemId, otherUserId } = req.body
     const userId = req.user.user_id
 
-    // Prevent users from messaging themselves
     if (userId === otherUserId) {
       return res.status(400).json({ message: 'You cannot message yourself' })
     }
 
-    // Ensure user1_id < user2_id for consistency
+    // lower id = user1 for dedup
     const user1Id = Math.min(userId, otherUserId)
     const user2Id = Math.max(userId, otherUserId)
 
-    // Check if conversation exists using Supabase
     const { data: existingConv, error: checkError } = await supabase
       .from('conversations')
       .select('conversation_id')
@@ -110,7 +103,6 @@ exports.getOrCreateConversation = async (req, res) => {
     if (existingConv && !checkError) {
       conversationId = existingConv.conversation_id
     } else {
-      // Create new conversation using Supabase
       const { data: newConv, error: insertError } = await supabase
         .from('conversations')
         .insert({
@@ -141,7 +133,6 @@ exports.getMessages = async (req, res) => {
     const { conversationId } = req.params
     const userId = req.user.user_id
 
-    // Verify user is part of conversation using Supabase
     const { data: convData, error: convError } = await supabase
       .from('conversations')
       .select('*')
@@ -153,7 +144,6 @@ exports.getMessages = async (req, res) => {
       return res.status(403).json({ message: 'Not authorized' })
     }
 
-    // Fetch messages using Supabase
     const { data: messagesData, error: messagesError } = await supabase
       .from('messages')
       .select(`
@@ -170,7 +160,6 @@ exports.getMessages = async (req, res) => {
       return res.status(500).json({ message: 'Failed to fetch messages' })
     }
 
-    // Mark messages as read using Supabase
     await supabase
       .from('messages')
       .update({ read_status: true })
@@ -178,7 +167,6 @@ exports.getMessages = async (req, res) => {
       .neq('sender_id', userId)
       .eq('read_status', false)
 
-    // Transform messages
     const messages = (messagesData || []).map((msg) => {
       const sender = Array.isArray(msg.users) ? msg.users[0] : msg.users
       return {
@@ -204,7 +192,6 @@ exports.sendMessage = async (req, res) => {
     const { conversationId, messageContent } = req.body
     const senderId = req.user.user_id
 
-    // Verify user is part of conversation using Supabase
     const { data: convData, error: convError } = await supabase
       .from('conversations')
       .select('*')
@@ -216,7 +203,6 @@ exports.sendMessage = async (req, res) => {
       return res.status(403).json({ message: 'Not authorized' })
     }
 
-    // Create message using Supabase
     const { data: messageData, error: insertError } = await supabase
       .from('messages')
       .insert({
@@ -232,7 +218,6 @@ exports.sendMessage = async (req, res) => {
       return res.status(500).json({ message: 'Failed to send message' })
     }
 
-    // Emit to Socket.IO if available
     const io = req.app.get('io')
     if (io) {
       io.to(`conversation-${conversationId}`).emit('new-message', {
@@ -265,7 +250,6 @@ exports.deleteConversation = async (req, res) => {
     const { conversationId } = req.params
     const userId = req.user.user_id
 
-    // Verify user is part of conversation using Supabase
     const { data: convData, error: convError } = await supabase
       .from('conversations')
       .select('*')
@@ -277,7 +261,6 @@ exports.deleteConversation = async (req, res) => {
       return res.status(403).json({ message: 'Not authorized' })
     }
 
-    // Delete conversation using Supabase (messages will be cascade deleted)
     const { error: deleteError } = await supabase
       .from('conversations')
       .delete()

@@ -20,15 +20,11 @@ const io = socketIo(server, {
   },
 })
 
-// Middleware
 app.use(cors())
-app.use(express.json({ limit: '10mb' })) // Increased limit for base64 images
+app.use(express.json({ limit: '10mb' })) // base64 images
 app.use(express.urlencoded({ extended: true, limit: '10mb' }))
-
-// Serve uploaded files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
 
-// Socket.IO for real-time messaging
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id)
 
@@ -37,8 +33,6 @@ io.on('connection', (socket) => {
   })
 
   socket.on('send-message', async (data) => {
-    // Message will be saved by the API endpoint
-    // Then broadcast to conversation room
     io.to(`conversation-${data.conversationId}`).emit('new-message', data)
   })
 
@@ -47,21 +41,17 @@ io.on('connection', (socket) => {
   })
 })
 
-// Make io available to routes
 app.set('io', io)
 
-// Routes
 app.use('/api/auth', authRoutes)
 app.use('/api/items', itemRoutes)
 app.use('/api/orders', orderRoutes)
 app.use('/api/messages', messageRoutes)
 
-// Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() })
 })
 
-// Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack)
   res.status(err.status || 500).json({

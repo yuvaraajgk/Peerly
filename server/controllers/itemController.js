@@ -3,7 +3,6 @@ const multer = require('multer')
 const path = require('path')
 const fs = require('fs')
 
-// Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const uploadDir = path.join(__dirname, '../uploads')
@@ -51,16 +50,14 @@ exports.createItem = async (req, res) => {
 
     const sellerId = req.user.user_id
 
-    // Convert string booleans to actual booleans (FormData sends strings)
+    // FormData sends strings
     const isForSaleBool = isForSale === 'true' || isForSale === true
     const isForRentBool = isForRent === 'true' || isForRent === true
 
-    // Validate that at least one transaction type is selected
     if (!isForSaleBool && !isForRentBool) {
       return res.status(400).json({ message: 'Item must be for sale or rent' })
     }
 
-    // Validate pricing - only check the selected transaction type
     if (isForSaleBool && (!priceSale || parseFloat(priceSale) <= 0)) {
       return res.status(400).json({ message: 'Sale price required' })
     }
@@ -68,7 +65,6 @@ exports.createItem = async (req, res) => {
       return res.status(400).json({ message: 'Daily rental price required' })
     }
 
-    // Create item using Supabase
     const { data: newItem, error: itemError } = await supabase
       .from('items')
       .insert({
@@ -91,7 +87,6 @@ exports.createItem = async (req, res) => {
       return res.status(500).json({ message: 'Failed to create item' })
     }
 
-    // Handle image uploads
     if (req.files && req.files.length > 0) {
       const imageInserts = req.files.map((file, index) => ({
         item_id: newItem.item_id,
@@ -105,11 +100,10 @@ exports.createItem = async (req, res) => {
 
       if (imageError) {
         console.error('Supabase image insert error:', imageError)
-        // Continue anyway, item is created
+        // non-fatal: item already created
       }
     }
 
-    // Fetch complete item with images
     const completeItem = await exports.getItemById(newItem.item_id)
 
     res.status(201).json({ item: completeItem })
@@ -121,7 +115,6 @@ exports.createItem = async (req, res) => {
 
 exports.getItemById = async (itemId) => {
   try {
-    // Fetch item with category and seller info
     const { data: items, error: itemError } = await supabase
       .from('items')
       .select(`
@@ -142,8 +135,7 @@ exports.getItemById = async (itemId) => {
       return null
     }
 
-    // Fetch images separately
-    const { data: images, error: imageError } = await supabase
+    const { data: images } = await supabase
       .from('item_images')
       .select('image_id, image_url, sort_order')
       .eq('item_id', itemId)
@@ -186,7 +178,6 @@ exports.getItems = async (req, res) => {
     const { category, status, search, page = 1, limit = 20 } = req.query
     const offset = (page - 1) * limit
 
-    // Build Supabase query
     let query = supabase
       .from('items')
       .select(`
@@ -207,9 +198,7 @@ exports.getItems = async (req, res) => {
       .order('created_at', { ascending: false })
       .range(offset, offset + parseInt(limit) - 1)
 
-    // Apply category filter
     if (category) {
-      // First get category ID
       const { data: categoryData } = await supabase
         .from('categories')
         .select('category_id')
@@ -221,7 +210,6 @@ exports.getItems = async (req, res) => {
       }
     }
 
-    // Apply search filter
     if (search) {
       query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%`)
     }
@@ -233,13 +221,12 @@ exports.getItems = async (req, res) => {
       return res.status(500).json({ message: 'Failed to fetch items' })
     }
 
-    // Transform data to match expected format
     const items = (itemsData || []).map((item) => {
       const category = Array.isArray(item.categories) ? item.categories[0] : item.categories
       const seller = Array.isArray(item.users) ? item.users[0] : item.users
       const images = Array.isArray(item.item_images) ? item.item_images : []
-      const thumbnail = images.length > 0 
-        ? images.sort((a, b) => a.sort_order - b.sort_order)[0]?.image_url 
+      const thumbnail = images.length > 0
+        ? images.sort((a, b) => a.sort_order - b.sort_order)[0]?.image_url
         : null
 
       return {
@@ -313,8 +300,8 @@ exports.getMyListings = async (req, res) => {
     const items = (itemsData || []).map((item) => {
       const category = Array.isArray(item.categories) ? item.categories[0] : item.categories
       const images = Array.isArray(item.item_images) ? item.item_images : []
-      const thumbnail = images.length > 0 
-        ? images.sort((a, b) => a.sort_order - b.sort_order)[0]?.image_url 
+      const thumbnail = images.length > 0
+        ? images.sort((a, b) => a.sort_order - b.sort_order)[0]?.image_url
         : null
 
       return {
@@ -348,7 +335,6 @@ exports.updateItemStatus = async (req, res) => {
     const { status } = req.body
     const sellerId = req.user.user_id
 
-    // Verify ownership using Supabase
     const { data: itemData, error: checkError } = await supabase
       .from('items')
       .select('seller_id')
@@ -363,7 +349,6 @@ exports.updateItemStatus = async (req, res) => {
       return res.status(403).json({ message: 'Not authorized' })
     }
 
-    // Update status using Supabase
     const { error: updateError } = await supabase
       .from('items')
       .update({ status })
@@ -399,7 +384,6 @@ exports.updateItem = async (req, res) => {
 
     const sellerId = req.user.user_id
 
-    // Verify ownership using Supabase
     const { data: itemData, error: checkError } = await supabase
       .from('items')
       .select('seller_id')
@@ -414,11 +398,10 @@ exports.updateItem = async (req, res) => {
       return res.status(403).json({ message: 'Not authorized' })
     }
 
-    // Convert string booleans to actual booleans (FormData sends strings)
+    // FormData sends strings
     const isForSaleBool = isForSale === 'true' || isForSale === true
     const isForRentBool = isForRent === 'true' || isForRent === true
 
-    // Update item using Supabase
     const updateData = {
       title,
       description: description || null,
@@ -441,14 +424,10 @@ exports.updateItem = async (req, res) => {
       return res.status(500).json({ message: 'Failed to update item' })
     }
 
-    // Handle image uploads if new images are provided
-    // Note: If new images are uploaded, they replace all existing images
-    // If no new images are uploaded, existing images are kept
+    // new images replace existing
     if (req.files && Array.isArray(req.files) && req.files.length > 0) {
-      // Delete old images
       await supabase.from('item_images').delete().eq('item_id', id)
 
-      // Insert new images
       const imageInserts = req.files.map((file, index) => ({
         item_id: id,
         image_url: `/uploads/${file.filename}`,
@@ -461,11 +440,10 @@ exports.updateItem = async (req, res) => {
 
       if (imageError) {
         console.error('Supabase image insert error:', imageError)
-        // Continue anyway, item is updated
+        // non-fatal: item already updated
       }
     }
 
-    // Fetch updated item
     const updatedItem = await exports.getItemById(id)
     res.json({ item: updatedItem, message: 'Item updated successfully' })
   } catch (error) {

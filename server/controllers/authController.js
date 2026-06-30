@@ -15,7 +15,6 @@ exports.signup = async (req, res) => {
   try {
     const { email, displayName, password } = req.body
 
-    // Check if user exists using Supabase
     const { data: existingUsers, error: checkError } = await supabase
       .from('users')
       .select('user_id')
@@ -31,13 +30,9 @@ exports.signup = async (req, res) => {
       return res.status(400).json({ message: 'Email already registered' })
     }
 
-    // Hash password
     const passwordHash = await bcrypt.hash(password, 10)
-
-    // Generate verification token
     const verificationToken = uuidv4()
 
-    // Create user using Supabase
     const { data: newUser, error: insertError } = await supabase
       .from('users')
       .insert({
@@ -55,7 +50,6 @@ exports.signup = async (req, res) => {
       return res.status(500).json({ message: 'Registration failed' })
     }
 
-    // Send verification email
     await emailService.sendVerificationEmail(email, verificationToken)
 
     res.status(201).json({
@@ -77,7 +71,6 @@ exports.login = async (req, res) => {
   try {
     const { email, password } = req.body
 
-    // Find user using Supabase
     const { data: users, error: fetchError } = await supabase
       .from('users')
       .select('user_id, college_email, display_name, password_hash, is_verified')
@@ -91,24 +84,20 @@ exports.login = async (req, res) => {
 
     const user = users
 
-    // Check password
     const isValidPassword = await bcrypt.compare(password, user.password_hash)
     if (!isValidPassword) {
       return res.status(401).json({ message: 'Invalid credentials' })
     }
 
-    // Check if verified
     if (!user.is_verified) {
       return res.status(403).json({ message: 'Please verify your email before logging in' })
     }
 
-    // Update last login using Supabase
     await supabase
       .from('users')
       .update({ last_login: new Date().toISOString() })
       .eq('user_id', user.user_id)
 
-    // Generate token
     const token = generateToken(user.user_id)
 
     res.json({
@@ -130,13 +119,9 @@ exports.verifyEmail = async (req, res) => {
   try {
     const { token } = req.body
 
-    // Update user verification status using Supabase
     const { data, error } = await supabase
       .from('users')
-      .update({ 
-        is_verified: true, 
-        verification_token: null 
-      })
+      .update({ is_verified: true, verification_token: null })
       .eq('verification_token', token)
       .select('user_id')
       .single()
@@ -154,8 +139,6 @@ exports.verifyEmail = async (req, res) => {
 
 exports.getMe = async (req, res) => {
   try {
-    // User is already attached by authMiddleware
-    // Fetch fresh data from Supabase
     const { data: user, error } = await supabase
       .from('users')
       .select('user_id, college_email, display_name, username, is_verified, profile_picture')
@@ -182,17 +165,15 @@ exports.getMe = async (req, res) => {
   }
 }
 
-// Helper function to check if email domain is allowed
 const isEmailDomainAllowed = (email) => {
   const allowedDomains = process.env.ALLOWED_EMAIL_DOMAINS
     ? process.env.ALLOWED_EMAIL_DOMAINS.split(',').map(d => d.trim().toLowerCase())
-    : ['@gmail.com'] // Default to gmail.com if not configured
+    : ['@gmail.com']
 
   const emailDomain = '@' + email.split('@')[1]?.toLowerCase()
   return allowedDomains.some(domain => emailDomain === domain || emailDomain.endsWith(domain))
 }
 
-// Google OAuth authentication
 exports.googleAuth = async (req, res) => {
   try {
     const { credential, isSignup } = req.body
@@ -201,7 +182,6 @@ exports.googleAuth = async (req, res) => {
       return res.status(400).json({ message: 'Google credential is required' })
     }
 
-    // Verify Google ID token
     const ticket = await client.verifyIdToken({
       idToken: credential,
       audience: process.env.GOOGLE_CLIENT_ID,
@@ -213,14 +193,10 @@ exports.googleAuth = async (req, res) => {
     const googleId = payload.sub
     const profilePicture = payload.picture || null
 
-    // Check if email domain is allowed
     if (!isEmailDomainAllowed(email)) {
-      return res.status(400).json({ 
-        message: 'invalid mail id'
-      })
+      return res.status(400).json({ message: 'invalid mail id' })
     }
 
-    // Check if user already exists
     const { data: existingUser, error: checkError } = await supabase
       .from('users')
       .select('user_id, college_email, display_name, username, google_id, profile_picture')
@@ -233,8 +209,7 @@ exports.googleAuth = async (req, res) => {
       return res.status(500).json({ message: 'Database error' })
     }
 
-    // If this is a signup attempt and user already exists, return isExistingUser flag
-    // This check must come BEFORE any login logic to prevent auto-login during signup
+    // signup: reject if account exists
     if (isSignup && existingUser && existingUser.user_id) {
       return res.json({
         isExistingUser: true,
@@ -242,12 +217,10 @@ exports.googleAuth = async (req, res) => {
       })
     }
 
-    // If user exists and has username, log them in directly
     if (existingUser && existingUser.username) {
-      // Update last login and user info
       await supabase
         .from('users')
-        .update({ 
+        .update({
           last_login: new Date().toISOString(),
           google_id: googleId,
           display_name: name,
@@ -271,15 +244,13 @@ exports.googleAuth = async (req, res) => {
       })
     }
 
-    // User exists but no username - needs to set username
     if (existingUser) {
-      // Update user info
       await supabase
         .from('users')
         .update({
           google_id: googleId,
           display_name: name,
-          is_verified: true, // Mark as verified since Google OAuth is sufficient
+          is_verified: true,
           profile_picture: profilePicture
         })
         .eq('user_id', existingUser.user_id)
@@ -300,14 +271,13 @@ exports.googleAuth = async (req, res) => {
       })
     }
 
-    // New user - create account
     const { data: newUser, error: insertError } = await supabase
       .from('users')
       .insert({
         college_email: email,
         display_name: name,
         google_id: googleId,
-        is_verified: true, // Verified via Google OAuth
+        is_verified: true,
         profile_picture: profilePicture
       })
       .select('user_id, college_email, display_name, profile_picture')
@@ -318,7 +288,6 @@ exports.googleAuth = async (req, res) => {
       return res.status(500).json({ message: 'Registration failed' })
     }
 
-    // Generate token for new user
     const token = generateToken(newUser.user_id)
 
     return res.json({
@@ -339,8 +308,6 @@ exports.googleAuth = async (req, res) => {
   }
 }
 
-
-// Set username
 exports.setUsername = async (req, res) => {
   try {
     const { userId, username } = req.body
@@ -349,14 +316,12 @@ exports.setUsername = async (req, res) => {
       return res.status(400).json({ message: 'User ID and username are required' })
     }
 
-    // Validate username format (alphanumeric, underscore, 3-20 chars)
     if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) {
-      return res.status(400).json({ 
-        message: 'Username must be 3-20 characters and contain only letters, numbers, and underscores' 
+      return res.status(400).json({
+        message: 'Username must be 3-20 characters and contain only letters, numbers, and underscores'
       })
     }
 
-    // Check if username is already taken
     const { data: existingUser, error: checkError } = await supabase
       .from('users')
       .select('user_id')
@@ -373,7 +338,6 @@ exports.setUsername = async (req, res) => {
       return res.status(400).json({ message: 'Username is already taken' })
     }
 
-    // Check if user exists
     const { data: user, error: userError } = await supabase
       .from('users')
       .select('user_id')
@@ -384,7 +348,6 @@ exports.setUsername = async (req, res) => {
       return res.status(404).json({ message: 'User not found' })
     }
 
-    // Update username
     const { data: updatedUser, error: updateError } = await supabase
       .from('users')
       .update({ username })
@@ -397,7 +360,6 @@ exports.setUsername = async (req, res) => {
       return res.status(500).json({ message: 'Failed to set username' })
     }
 
-    // Generate token and log user in
     const token = generateToken(updatedUser.user_id)
 
     res.json({
