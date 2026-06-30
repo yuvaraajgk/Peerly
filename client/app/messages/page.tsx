@@ -21,6 +21,7 @@ interface Conversation {
 
 interface Message {
   messageId: number
+  conversationId: number
   senderId: number
   senderName: string
   messageContent: string
