@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { FeaturedCategories } from '@/components/common/FeaturedCategories'
 import { Navbar } from '@/components/common/Navbar'
 import { useAuth } from '@/contexts/AuthContext'
 
@@ -67,54 +66,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* Featured Categories */}
-      <section className="px-4 py-16 max-w-6xl mx-auto">
-        <h2 className="text-3xl font-semibold text-text-primary mb-8 text-center">
-          Featured Categories
-        </h2>
-        <FeaturedCategories />
-      </section>
-
-      {/* How It Works - Only show when logged out */}
-      {!user && (
-        <section className="px-4 py-16 bg-surface">
-          <div className="max-w-6xl mx-auto">
-            <h2 className="text-3xl font-semibold text-text-primary mb-12 text-center">
-              How It Works
-            </h2>
-            <div className="grid md:grid-cols-3 gap-8">
-              <div className="text-center">
-                <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4">
-                  1
-                </div>
-                <h3 className="text-xl font-semibold mb-2">Sign Up</h3>
-                <p className="text-text-secondary">
-                  Verify your college email address to join the community
-                </p>
-              </div>
-              <div className="text-center">
-                <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4">
-                  2
-                </div>
-                <h3 className="text-xl font-semibold mb-2">List or Browse</h3>
-                <p className="text-text-secondary">
-                  Post items for sale or rent, or browse what others are offering
-                </p>
-              </div>
-              <div className="text-center">
-                <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4">
-                  3
-                </div>
-                <h3 className="text-xl font-semibold mb-2">Connect & Transact</h3>
-                <p className="text-text-secondary">
-                  Message sellers, complete transactions, and track your orders
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
     </div>
   )
 }

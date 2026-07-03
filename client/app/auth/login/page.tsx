@@ -48,8 +48,6 @@ export default function LoginPage() {
             <ul className="space-y-4 text-sm text-white/85">
               <li className="flex gap-2 items-start"><span className="text-success font-bold">✓</span> Verified college email required</li>
               <li className="flex gap-2 items-start"><span className="text-success font-bold">✓</span> Sign in with your existing Google account</li>
-              <li className="flex gap-2 items-start"><span className="text-success font-bold">✓</span> No passwords to remember or leak</li>
-              <li className="flex gap-2 items-start"><span className="text-success font-bold">✓</span> Cash-only, in-person exchanges</li>
             </ul>
             <div />
           </div>
@@ -58,12 +56,6 @@ export default function LoginPage() {
             <h1 className="text-3xl font-bold text-text-primary mb-6 text-center">Sign in to Peerly</h1>
 
             <div className="space-y-6">
-              <div>
-                <p className="text-sm text-text-secondary mb-4 text-center">
-                  Use your college Gmail account. New here? Your account is created automatically the first time you sign in.
-                </p>
-              </div>
-
               <div className="flex justify-center">
                 {loading ? (
                   <div className="flex items-center gap-3 py-3">
