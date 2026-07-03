@@ -22,7 +22,10 @@ export default function Home() {
       <Navbar />
 
       {/* Hero Section */}
-      <section className="px-4 py-16 md:py-24 bg-gradient-to-b from-secondary/40 to-background">
+      <section
+        className="px-4 py-16 md:py-24"
+        style={{ background: 'linear-gradient(120deg, #EEF2FF 0%, #ECFEFF 60%, #FFFFFF 100%)' }}
+      >
         <div className="max-w-6xl mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-text-primary mb-6">
             Welcome to Peerly

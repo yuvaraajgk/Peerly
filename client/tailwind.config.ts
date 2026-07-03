@@ -10,19 +10,19 @@ const config: Config = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#0F7A6E',
-          dark: '#0B5E55',
-          light: '#14B8A6',
+          DEFAULT: '#4338CA',
+          dark: '#362E9E',
+          light: '#6366F1',
         },
         secondary: {
-          DEFAULT: '#E7F5F2',
-          dark: '#CFEAE4',
+          DEFAULT: '#EEF2FF',
+          dark: '#E0E1FA',
         },
         background: '#FFFFFF',
-        surface: '#F7F8FA',
+        surface: '#F6F6FB',
         text: {
-          primary: '#111827',
-          secondary: '#5B6472',
+          primary: '#1E1B3A',
+          secondary: '#5D5A82',
         },
         success: '#1A7F4E',
         warning: '#B4690A',
