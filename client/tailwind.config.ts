@@ -10,26 +10,26 @@ const config: Config = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#008080',
-          dark: '#006666',
-          light: '#00A0A0',
+          DEFAULT: '#0F7A6E',
+          dark: '#0B5E55',
+          light: '#14B8A6',
         },
         secondary: {
-          DEFAULT: '#ADD8E6',
-          dark: '#87CEEB',
+          DEFAULT: '#E7F5F2',
+          dark: '#CFEAE4',
         },
         background: '#FFFFFF',
-        surface: '#F5F5F5',
+        surface: '#F7F8FA',
         text: {
-          primary: '#333333',
-          secondary: '#777777',
+          primary: '#111827',
+          secondary: '#5B6472',
         },
-        success: '#228B22',
-        warning: '#FFA500',
-        danger: '#DC143C',
+        success: '#1A7F4E',
+        warning: '#B4690A',
+        danger: '#B42318',
       },
       fontFamily: {
-        sans: ['system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Inter', 'Poppins', 'sans-serif'],
+        sans: ['system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
       },
     },
   },
