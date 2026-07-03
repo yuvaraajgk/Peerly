@@ -1,21 +1,43 @@
 const { supabase } = require('../config/db')
 const multer = require('multer')
 const path = require('path')
-const fs = require('fs')
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadDir = path.join(__dirname, '../uploads')
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true })
+const STORAGE_BUCKET = 'item-images'
+let bucketReady = false
+
+const ensureBucketExists = async () => {
+  if (bucketReady) return
+  const { data: existing } = await supabase.storage.getBucket(STORAGE_BUCKET)
+  if (!existing) {
+    const { error } = await supabase.storage.createBucket(STORAGE_BUCKET, {
+      public: true,
+      fileSizeLimit: 2 * 1024 * 1024,
+    })
+    if (error && !/already exists/i.test(error.message || '')) {
+      throw error
     }
-    cb(null, uploadDir)
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9)
-    cb(null, 'item-' + uniqueSuffix + path.extname(file.originalname))
-  },
-})
+  }
+  bucketReady = true
+}
+
+const uploadFileToStorage = async (file) => {
+  await ensureBucketExists()
+  const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9)
+  const filename = `item-${uniqueSuffix}${path.extname(file.originalname)}`
+
+  const { error: uploadError } = await supabase.storage
+    .from(STORAGE_BUCKET)
+    .upload(filename, file.buffer, { contentType: file.mimetype, upsert: false })
+
+  if (uploadError) {
+    throw uploadError
+  }
+
+  const { data } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(filename)
+  return data.publicUrl
+}
+
+const storage = multer.memoryStorage()
 
 const upload = multer({
   storage,
@@ -88,18 +110,24 @@ exports.createItem = async (req, res) => {
     }
 
     if (req.files && req.files.length > 0) {
-      const imageInserts = req.files.map((file, index) => ({
-        item_id: newItem.item_id,
-        image_url: `/uploads/${file.filename}`,
-        sort_order: index + 1,
-      }))
+      try {
+        const imageUrls = await Promise.all(req.files.map((file) => uploadFileToStorage(file)))
+        const imageInserts = imageUrls.map((imageUrl, index) => ({
+          item_id: newItem.item_id,
+          image_url: imageUrl,
+          sort_order: index + 1,
+        }))
 
-      const { error: imageError } = await supabase
-        .from('item_images')
-        .insert(imageInserts)
+        const { error: imageError } = await supabase
+          .from('item_images')
+          .insert(imageInserts)
 
-      if (imageError) {
-        console.error('Supabase image insert error:', imageError)
+        if (imageError) {
+          console.error('Supabase image insert error:', imageError)
+          // non-fatal: item already created
+        }
+      } catch (uploadErr) {
+        console.error('Image upload error:', uploadErr)
         // non-fatal: item already created
       }
     }
@@ -426,20 +454,27 @@ exports.updateItem = async (req, res) => {
 
     // new images replace existing
     if (req.files && Array.isArray(req.files) && req.files.length > 0) {
-      await supabase.from('item_images').delete().eq('item_id', id)
+      try {
+        const imageUrls = await Promise.all(req.files.map((file) => uploadFileToStorage(file)))
 
-      const imageInserts = req.files.map((file, index) => ({
-        item_id: id,
-        image_url: `/uploads/${file.filename}`,
-        sort_order: index + 1,
-      }))
+        await supabase.from('item_images').delete().eq('item_id', id)
 
-      const { error: imageError } = await supabase
-        .from('item_images')
-        .insert(imageInserts)
+        const imageInserts = imageUrls.map((imageUrl, index) => ({
+          item_id: id,
+          image_url: imageUrl,
+          sort_order: index + 1,
+        }))
 
-      if (imageError) {
-        console.error('Supabase image insert error:', imageError)
+        const { error: imageError } = await supabase
+          .from('item_images')
+          .insert(imageInserts)
+
+        if (imageError) {
+          console.error('Supabase image insert error:', imageError)
+          // non-fatal: item already updated
+        }
+      } catch (uploadErr) {
+        console.error('Image upload error:', uploadErr)
         // non-fatal: item already updated
       }
     }

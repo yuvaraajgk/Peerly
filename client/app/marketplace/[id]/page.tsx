@@ -152,6 +152,7 @@ export default function ItemDetailPage() {
   // Get API base URL (remove /api suffix for static files)
   const getImageUrl = (imageUrl: string) => {
     if (!imageUrl) return null
+    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) return imageUrl
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'
     const baseUrl = apiUrl.replace('/api', '')
     // Ensure imageUrl starts with /

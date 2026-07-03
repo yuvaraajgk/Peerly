@@ -32,6 +32,7 @@ export function ItemCard({ item }: ItemCardProps) {
   // strip /api for static files
   const getImageUrl = (thumbnail: string | null) => {
     if (!thumbnail) return null
+    if (thumbnail.startsWith('http://') || thumbnail.startsWith('https://')) return thumbnail
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'
     const baseUrl = apiUrl.replace('/api', '')
     const thumbnailPath = thumbnail.startsWith('/') ? thumbnail : `/${thumbnail}`
