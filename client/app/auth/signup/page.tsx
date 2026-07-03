@@ -68,13 +68,6 @@ export default function SignupPage() {
     }
   }
 
-  const handleLoginLinkClick = () => {
-    // Don't change the page to login mode, just trigger Google sign-in
-    setIsExistingUser(false)
-    setIsLoginAttempt(true)
-    setTriggerGoogleClick(true)
-  }
-
   // Trigger Google button click when triggerGoogleClick is true
   useEffect(() => {
     if (triggerGoogleClick && googleButtonContainerRef.current) {
@@ -267,7 +260,7 @@ export default function SignupPage() {
               <p className="mt-6 text-center text-text-secondary">
                 Already have an account?{' '}
                 <button
-                  onClick={handleLoginLinkClick}
+                  onClick={() => router.push('/auth/login')}
                   className="text-primary hover:underline"
                 >
                   Login
