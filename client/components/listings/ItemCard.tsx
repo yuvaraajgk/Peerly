@@ -42,9 +42,9 @@ export function ItemCard({ item }: ItemCardProps) {
   const imageUrl = getImageUrl(item.thumbnail)
 
   return (
-    <Link href={`/marketplace/${item.itemId}`}>
-      <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden">
-        <div className="aspect-square relative bg-white">
+    <Link href={`/marketplace/${item.itemId}`} className="h-full block">
+      <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden h-full flex flex-col">
+        <div className="aspect-square relative bg-white shrink-0">
           {imageUrl ? (
             <Image
               src={imageUrl}
@@ -72,8 +72,8 @@ export function ItemCard({ item }: ItemCardProps) {
             )}
           </div>
         </div>
-        <div className="p-4">
-          <h3 className="text-lg font-semibold text-text-primary mb-2 line-clamp-2">
+        <div className="p-4 flex flex-col flex-1">
+          <h3 className="text-lg font-semibold text-text-primary mb-2 line-clamp-2 min-h-[3.5rem]">
             {item.title}
           </h3>
           <div className="flex items-center justify-between mb-2">
@@ -93,7 +93,7 @@ export function ItemCard({ item }: ItemCardProps) {
               {item.condition}
             </span>
           </div>
-          <p className="text-sm text-text-secondary">by {item.sellerName}</p>
+          <p className="text-sm text-text-secondary mt-auto">by {item.sellerName}</p>
         </div>
       </div>
     </Link>
