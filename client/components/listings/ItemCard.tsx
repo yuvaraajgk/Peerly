@@ -43,7 +43,7 @@ export function ItemCard({ item }: ItemCardProps) {
 
   return (
     <Link href={`/marketplace/${item.itemId}`} className="h-full block">
-      <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden h-full flex flex-col">
+      <div className="bg-white rounded-lg border border-secondary-dark shadow-sm hover:shadow-md hover:border-primary/30 transition-all overflow-hidden h-full flex flex-col">
         <div className="aspect-square relative bg-white shrink-0">
           {imageUrl ? (
             <Image

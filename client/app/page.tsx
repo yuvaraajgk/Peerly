@@ -24,7 +24,7 @@ export default function Home() {
       {/* Hero Section */}
       <section
         className="px-4 py-16 md:py-24"
-        style={{ background: 'linear-gradient(120deg, #EEF2FF 0%, #ECFEFF 60%, #FFFFFF 100%)' }}
+        style={{ background: 'linear-gradient(180deg, #EEF2FF 0%, #ECFEFF 40%, #FFFFFF 100%)' }}
       >
         <div className="max-w-6xl mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-text-primary mb-6">
