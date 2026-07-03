@@ -23,7 +23,7 @@ export default function SetUsernamePage() {
       setUserId(user.userId)
     } else {
       // No pending user, redirect to signup
-      router.push('/auth/signup')
+      router.push('/auth/login')
     }
   }, [router])
 
@@ -47,7 +47,7 @@ export default function SetUsernamePage() {
 
     if (!userId) {
       toast.error('Session expired. Please sign up again.')
-      router.push('/auth/signup')
+      router.push('/auth/login')
       return
     }
 

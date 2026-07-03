@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 import { GoogleLogin } from '@react-oauth/google'
 import { useAuth } from '@/contexts/AuthContext'
 import { Navbar } from '@/components/common/Navbar'
@@ -56,12 +55,12 @@ export default function LoginPage() {
           </div>
 
           <div className="p-8 md:p-10">
-            <h1 className="text-3xl font-bold text-text-primary mb-6 text-center">Login</h1>
+            <h1 className="text-3xl font-bold text-text-primary mb-6 text-center">Sign in to Peerly</h1>
 
             <div className="space-y-6">
               <div>
                 <p className="text-sm text-text-secondary mb-4 text-center">
-                  Sign in with your college Gmail account
+                  Use your college Gmail account. New here? Your account is created automatically the first time you sign in.
                 </p>
               </div>
 
@@ -92,13 +91,6 @@ export default function LoginPage() {
                 </div>
               </div>
             </div>
-
-            <p className="mt-6 text-center text-text-secondary">
-              Don't have an account?{' '}
-              <Link href="/auth/signup" className="text-primary hover:underline">
-                Sign up
-              </Link>
-            </p>
           </div>
         </div>
       </div>

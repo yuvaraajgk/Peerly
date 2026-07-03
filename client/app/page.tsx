@@ -52,7 +52,7 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             {!user && (
               <Link
-                href="/auth/signup"
+                href="/auth/login"
                 className="px-8 py-4 bg-primary text-white rounded-lg font-medium hover:bg-primary-dark transition-colors"
               >
                 Sign Up & Post Your First Item
