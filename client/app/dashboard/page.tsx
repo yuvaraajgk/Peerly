@@ -179,12 +179,20 @@ export default function DashboardPage() {
                           </div>
                         )}
                         {listing.status === 'Draft' && (
-                          <button
-                            onClick={() => router.push(`/dashboard/edit-item/${listing.itemId}`)}
-                            className="w-full px-3 py-2 bg-primary text-white rounded text-sm hover:bg-primary-dark transition-colors"
-                          >
-                            Continue Editing
-                          </button>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => router.push(`/dashboard/edit-item/${listing.itemId}`)}
+                              className="flex-1 px-3 py-2 bg-secondary text-text-primary rounded text-sm hover:bg-gray-200 transition-colors"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => updateItemStatus(listing.itemId, 'Available')}
+                              className="flex-1 px-3 py-2 bg-primary text-white rounded text-sm hover:bg-primary-dark transition-colors"
+                            >
+                              Publish
+                            </button>
+                          </div>
                         )}
                         {(listing.status === 'Sold' || listing.status === 'Rented') && (
                           <div className="flex gap-2">

@@ -17,7 +17,7 @@ export default function EditItemPage() {
   const { user, loading: authLoading } = useAuth()
   const router = useRouter()
   const params = useParams()
-  const itemId = params.id as string
+  const itemId = (params?.id ?? '') as string
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
@@ -253,10 +253,7 @@ export default function EditItemPage() {
         },
       })
 
-      // Restore status to Available if it was originally Available
-      if (originalStatus === 'Available') {
-        await api.patch(`/items/${itemId}/status`, { status: 'Available' })
-      }
+      await api.patch(`/items/${itemId}/status`, { status: 'Available' })
 
       toast.success('Item updated successfully!')
       router.push('/dashboard')
@@ -306,7 +303,7 @@ export default function EditItemPage() {
                   name="transactionType"
                   value="sale"
                   checked={transactionType === 'sale'}
-                  onChange={(e) => {
+                  onChange={() => {
                     setTransactionType('sale')
                     setFormData({ ...formData, priceRentDaily: '' })
                   }}
@@ -320,7 +317,7 @@ export default function EditItemPage() {
                   name="transactionType"
                   value="rent"
                   checked={transactionType === 'rent'}
-                  onChange={(e) => {
+                  onChange={() => {
                     setTransactionType('rent')
                     setFormData({ ...formData, priceSale: '', condition: 'Good', itemAge: '' })
                   }}
