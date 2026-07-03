@@ -38,12 +38,12 @@ export default function Home() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search for calculator, cycle, textbook…"
-              className="flex-1 px-4 py-3 border border-secondary-dark rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+              placeholder="Search calculator, cycle, textbook…"
+              className="min-w-0 flex-1 px-4 py-3 text-sm sm:text-base border border-secondary-dark rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
             />
             <button
               type="submit"
-              className="px-6 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary-dark transition-colors"
+              className="px-4 sm:px-6 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary-dark transition-colors whitespace-nowrap"
             >
               Search
             </button>

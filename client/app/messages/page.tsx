@@ -256,9 +256,9 @@ function MessagesContent() {
         <h1 className="text-3xl font-bold text-text-primary mb-8">Messages</h1>
 
         <div className="bg-white rounded-lg shadow-md overflow-hidden" style={{ height: '600px' }}>
-          <div className="grid grid-cols-3 h-full">
+          <div className="grid grid-cols-1 md:grid-cols-3 h-full">
             {/* Conversations List */}
-            <div className="border-r border-surface overflow-y-auto">
+            <div className={`border-r border-surface overflow-y-auto ${selectedConversation ? 'hidden md:block' : ''}`}>
               {conversations.length === 0 ? (
                 <div className="p-4 text-center text-text-secondary">
                   No conversations yet
@@ -319,16 +319,25 @@ function MessagesContent() {
             </div>
 
             {/* Messages Area */}
-            <div className="col-span-2 flex flex-col">
+            <div className={`md:col-span-2 flex-col ${selectedConversation ? 'flex' : 'hidden md:flex'}`}>
               {selectedConversation ? (
                 <>
                   {/* Chat Header */}
-                  <div className="border-b border-surface p-4 bg-white">
+                  <div className="border-b border-surface p-4 bg-white flex items-center gap-3">
+                    <button
+                      onClick={() => setSelectedConversation(null)}
+                      aria-label="Back to conversations"
+                      className="md:hidden p-1 -ml-1 text-text-secondary hover:text-text-primary"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
                     <h2 className="font-semibold text-text-primary">
                       {(() => {
                         const conv = conversations.find(c => c.conversationId === selectedConversation)
                         if (!conv) return 'Chat'
-                        return conv.otherUserName && conv.itemTitle 
+                        return conv.otherUserName && conv.itemTitle
                           ? `${conv.otherUserName} - ${conv.itemTitle}`
                           : conv.otherUserName || conv.itemTitle || 'Chat'
                       })()}
@@ -338,7 +347,7 @@ function MessagesContent() {
                     {/* Contact Recommendation Box */}
                     {showContactRecommendation && (
                       <div className="mb-4 flex justify-center">
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 max-w-md flex items-center justify-between gap-3">
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 max-w-md w-full flex flex-wrap items-center justify-between gap-3">
                           <div className="flex-1">
                             <p className="text-sm text-blue-800 font-medium">💡 Suggestion</p>
                             <p className="text-xs text-blue-700 mt-1">Ask for contact number</p>

@@ -199,7 +199,7 @@ export default function ItemDetailPage() {
                 )}
               </div>
               {item.images.length > 1 && (
-                <div className="grid grid-cols-5 gap-2">
+                <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
                   {item.images.map((img, index) => (
                     <button
                       key={img.imageId}
