@@ -19,11 +19,11 @@ export function ItemCard({ item }: ItemCardProps) {
   const getConditionColor = (condition: string) => {
     switch (condition) {
       case 'New':
-        return 'bg-success text-white'
+        return 'bg-success/10 text-success'
       case 'Like New':
-        return 'bg-secondary text-text-primary'
+        return 'bg-primary/10 text-primary-dark'
       case 'Good':
-        return 'bg-warning text-white'
+        return 'bg-warning/10 text-warning'
       default:
         return 'bg-surface text-text-secondary'
     }
@@ -60,12 +60,12 @@ export function ItemCard({ item }: ItemCardProps) {
           )}
           <div className="absolute top-2 left-2 flex gap-2">
             {item.isForSale && (
-              <span className="px-2 py-1 bg-primary text-white text-xs font-semibold rounded shadow-md">
+              <span className="px-2.5 py-1 bg-white/95 text-primary-dark text-xs font-semibold rounded-full shadow-sm">
                 For Sale
               </span>
             )}
             {item.isForRent && (
-              <span className="px-2 py-1 bg-warning text-white text-xs font-semibold rounded shadow-md">
+              <span className="px-2.5 py-1 bg-white/95 text-warning text-xs font-semibold rounded-full shadow-sm">
                 For Rent
               </span>
             )}
@@ -78,17 +78,17 @@ export function ItemCard({ item }: ItemCardProps) {
           <div className="flex items-center justify-between mb-2">
             <div>
               {item.isForSale && item.priceSale && (
-                <p className="text-xl font-bold text-primary">
+                <p className="text-xl font-bold text-primary font-mono tabular-nums">
                   ₹{item.priceSale.toLocaleString()}
                 </p>
               )}
               {item.isForRent && item.priceRentDaily && (
-                <p className="text-lg font-semibold text-warning">
+                <p className="text-lg font-semibold text-warning font-mono tabular-nums">
                   ₹{item.priceRentDaily}/day
                 </p>
               )}
             </div>
-            <span className={`px-2 py-1 rounded text-xs ${getConditionColor(item.condition)}`}>
+            <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${getConditionColor(item.condition)}`}>
               {item.condition}
             </span>
           </div>

@@ -34,10 +34,17 @@ export default function ItemDetailPage() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
   const [isInWishlist, setIsInWishlist] = useState(false)
   const [wishlistTransactionId, setWishlistTransactionId] = useState<number | null>(null)
+  const [selectedMode, setSelectedMode] = useState<'sale' | 'rent'>('sale')
 
   useEffect(() => {
     fetchItem()
   }, [params.id])
+
+  useEffect(() => {
+    if (item) {
+      setSelectedMode(item.isForSale ? 'sale' : 'rent')
+    }
+  }, [item?.itemId])
 
   useEffect(() => {
     if (user && item) {
@@ -99,15 +106,17 @@ export default function ItemDetailPage() {
       return
     }
 
+    const wantsRental = item.isForRent && (!item.isForSale || selectedMode === 'rent')
+
     // Add to wishlist
-    if (item.isForRent && rentalDays < 1) {
+    if (wantsRental && rentalDays < 1) {
       toast.error('Please select rental duration')
       return
     }
 
     try {
-      const transactionType = item.isForRent && rentalDays ? 'Rental' : 'Purchase'
-      
+      const transactionType = wantsRental ? 'Rental' : 'Purchase'
+
       const response = await api.post('/orders', {
         itemId: item.itemId,
         transactionType,
@@ -172,12 +181,12 @@ export default function ItemDetailPage() {
                     {/* Transaction Type Badges */}
                     <div className="absolute top-4 left-4 flex gap-2">
                       {item.isForSale && (
-                        <span className="px-3 py-1 bg-primary text-white text-sm font-semibold rounded shadow-lg">
+                        <span className="px-3 py-1 bg-white/95 text-primary-dark text-sm font-semibold rounded-full shadow-md">
                           For Sale
                         </span>
                       )}
                       {item.isForRent && (
-                        <span className="px-3 py-1 bg-warning text-white text-sm font-semibold rounded shadow-lg">
+                        <span className="px-3 py-1 bg-white/95 text-warning text-sm font-semibold rounded-full shadow-md">
                           For Rent
                         </span>
                       )}
@@ -227,14 +236,48 @@ export default function ItemDetailPage() {
               </div>
 
               <div className="mb-6">
-                {item.isForSale && item.priceSale && (
-                  <p className="text-3xl font-bold text-primary mb-2">
+                {item.isForSale && item.isForRent && (
+                  <div className="flex gap-2 mb-4">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedMode('sale')}
+                      className={`flex-1 p-3 rounded-lg border text-center transition-colors ${
+                        selectedMode === 'sale'
+                          ? 'border-primary bg-primary/10'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <div className="text-xs font-semibold uppercase tracking-wide text-text-secondary">Buy</div>
+                      <div className="text-lg font-bold text-text-primary font-mono tabular-nums">
+                        ₹{item.priceSale?.toLocaleString()}
+                      </div>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedMode('rent')}
+                      className={`flex-1 p-3 rounded-lg border text-center transition-colors ${
+                        selectedMode === 'rent'
+                          ? 'border-primary bg-primary/10'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <div className="text-xs font-semibold uppercase tracking-wide text-text-secondary">Rent / day</div>
+                      <div className="text-lg font-bold text-text-primary font-mono tabular-nums">
+                        ₹{item.priceRentDaily}
+                      </div>
+                    </button>
+                  </div>
+                )}
+
+                {item.isForSale && !item.isForRent && item.priceSale && (
+                  <p className="text-3xl font-bold text-primary mb-2 font-mono tabular-nums">
                     ₹{item.priceSale.toLocaleString()}
                   </p>
                 )}
-                {item.isForRent && item.priceRentDaily && (
+
+                {((item.isForRent && !item.isForSale) || (item.isForRent && item.isForSale && selectedMode === 'rent')) && item.priceRentDaily && (
                   <div className="bg-warning/10 p-4 rounded-lg mb-4">
-                    <p className="text-lg font-semibold text-warning mb-2">
+                    <p className="text-lg font-semibold text-warning mb-2 font-mono tabular-nums">
                       ₹{item.priceRentDaily}/day
                     </p>
                     <div className="space-y-2">
@@ -249,7 +292,7 @@ export default function ItemDetailPage() {
                         className="w-24 px-3 py-2 border border-gray-300 rounded-lg"
                       />
                       {rentalDays > 0 && (
-                        <p className="text-lg font-bold text-text-primary">
+                        <p className="text-lg font-bold text-text-primary font-mono tabular-nums">
                           Total: ₹{totalRentalCost.toLocaleString()}
                         </p>
                       )}

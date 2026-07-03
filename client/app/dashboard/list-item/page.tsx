@@ -215,14 +215,20 @@ export default function ListItemPage() {
       <div className="max-w-4xl mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold text-text-primary mb-8">List an Item</h1>
 
-        <form onSubmit={handleSubmit} noValidate className="bg-white rounded-lg shadow-md p-8 space-y-6">
+        <form onSubmit={handleSubmit} noValidate className="bg-white rounded-lg shadow-md p-8">
           {/* Transaction Type Selection - FIRST */}
-          <div>
+          <div className="mb-6">
             <label className="block text-sm font-medium text-text-primary mb-2">
               Transaction Type *
             </label>
-            <div className="space-y-2">
-              <label className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+            <div className="flex gap-3">
+              <label
+                className={`flex-1 text-center p-3 border rounded-lg cursor-pointer transition-colors ${
+                  transactionType === 'sale'
+                    ? 'border-primary bg-primary/10 text-primary-dark'
+                    : 'border-gray-200 text-text-secondary hover:border-gray-300'
+                }`}
+              >
                 <input
                   type="radio"
                   name="transactionType"
@@ -233,11 +239,17 @@ export default function ListItemPage() {
                     // Clear rental price when switching to sale
                     setFormData({ ...formData, priceRentDaily: '' })
                   }}
-                  className="mr-3"
+                  className="sr-only"
                 />
                 <span className="font-medium">For Sale</span>
               </label>
-              <label className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+              <label
+                className={`flex-1 text-center p-3 border rounded-lg cursor-pointer transition-colors ${
+                  transactionType === 'rent'
+                    ? 'border-primary bg-primary/10 text-primary-dark'
+                    : 'border-gray-200 text-text-secondary hover:border-gray-300'
+                }`}
+              >
                 <input
                   type="radio"
                   name="transactionType"
@@ -248,7 +260,7 @@ export default function ListItemPage() {
                     // Clear sale price when switching to rent
                     setFormData({ ...formData, priceSale: '', condition: 'Good', itemAge: '' })
                   }}
-                  className="mr-3"
+                  className="sr-only"
                 />
                 <span className="font-medium">For Rent</span>
               </label>
@@ -257,8 +269,8 @@ export default function ListItemPage() {
 
           {/* Show form fields only after transaction type is selected */}
           {transactionType && (
-            <>
-              <div>
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-text-primary mb-2">
                   Title *
                 </label>
@@ -272,7 +284,7 @@ export default function ListItemPage() {
                 />
               </div>
 
-              <div>
+              <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-text-primary mb-2">
                   Description
                 </label>
@@ -373,18 +385,23 @@ export default function ListItemPage() {
                 </div>
               )}
 
-              <div>
+              <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-text-primary mb-2">
                   Images (up to 5, max 2MB each) - PNG or JPG only
                 </label>
-                <input
-                  type="file"
-                  accept="image/png,image/jpeg,image/jpg"
-                  multiple
-                  onChange={handleImageChange}
-                  disabled={images.length >= 5}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                />
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary transition-colors">
+                  <p className="text-sm text-text-secondary mb-3">
+                    <span className="font-medium text-text-primary">Choose images</span> to upload
+                  </p>
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/jpg"
+                    multiple
+                    onChange={handleImageChange}
+                    disabled={images.length >= 5}
+                    className="w-full text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  />
+                </div>
                 {images.length > 0 && (
                   <div className="mt-4">
                     <p className="text-sm text-text-secondary mb-3">
@@ -422,13 +439,13 @@ export default function ListItemPage() {
                   </p>
                 )}
               </div>
-            </>
+            </div>
           )}
 
           <button
             type="submit"
             disabled={submitting}
-            className="w-full py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full mt-6 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {submitting ? 'Listing...' : 'List Item'}
           </button>

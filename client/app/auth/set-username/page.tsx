@@ -74,8 +74,19 @@ export default function SetUsernamePage() {
   return (
     <div className="min-h-screen bg-surface">
       <Navbar />
-      <div className="max-w-md mx-auto px-4 py-16">
-        <div className="bg-white rounded-lg shadow-md p-8">
+      <div className="max-w-4xl mx-auto px-4 py-16">
+        <div className="bg-white rounded-lg shadow-md overflow-hidden grid md:grid-cols-2">
+          <div className="hidden md:flex flex-col justify-between bg-text-primary text-white p-10">
+            <div className="text-xl font-bold">Peerly</div>
+            <ul className="space-y-4 text-sm text-white/85">
+              <li className="flex gap-2 items-start"><span className="text-success font-bold">✓</span> One more step to go</li>
+              <li className="flex gap-2 items-start"><span className="text-success font-bold">✓</span> This is how other students see you</li>
+              <li className="flex gap-2 items-start"><span className="text-success font-bold">✓</span> You can change it later in settings</li>
+            </ul>
+            <div />
+          </div>
+
+          <div className="p-8 md:p-10">
           <h1 className="text-3xl font-bold text-text-primary mb-2 text-center">
             Choose Your Username
           </h1>
@@ -131,6 +142,7 @@ export default function SetUsernamePage() {
           <p className="mt-6 text-center text-sm text-text-secondary">
             Your username can be changed later in settings
           </p>
+          </div>
         </div>
       </div>
     </div>

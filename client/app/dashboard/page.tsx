@@ -59,6 +59,25 @@ export default function DashboardPage() {
     }
   }
 
+  const getThumbnailUrl = (thumbnail: string | null) => {
+    if (!thumbnail) return null
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'
+    const baseUrl = apiUrl.replace('/api', '')
+    const thumbnailPath = thumbnail.startsWith('/') ? thumbnail : `/${thumbnail}`
+    return `${baseUrl}${thumbnailPath}`
+  }
+
+  const statusBadgeClass = (status: string) => {
+    switch (status) {
+      case 'Available':
+        return 'bg-success/10 text-success'
+      case 'Draft':
+        return 'bg-warning/10 text-warning'
+      default:
+        return 'bg-surface text-text-secondary'
+    }
+  }
+
   const updateItemStatus = async (itemId: number, status: string) => {
     try {
       await api.patch(`/items/${itemId}/status`, { status })
@@ -140,18 +159,35 @@ export default function DashboardPage() {
                   </p>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {listings.map((listing) => (
-                      <div key={listing.itemId} className="border border-surface rounded-lg p-4">
+                    {listings.map((listing) => {
+                      const thumbUrl = getThumbnailUrl(listing.thumbnail)
+                      return (
+                      <div key={listing.itemId} className="border border-surface rounded-lg overflow-hidden">
                         <Link href={`/marketplace/${listing.itemId}`}>
-                          <h3 className="font-semibold text-text-primary mb-2">{listing.title}</h3>
+                          <div className="aspect-video relative bg-surface">
+                            {thumbUrl ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img src={thumbUrl} alt={listing.title} className="w-full h-full object-contain" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-text-secondary text-sm">
+                                No Image
+                              </div>
+                            )}
+                          </div>
                         </Link>
-                        <p className="text-sm text-text-secondary mb-4">
-                          Status: <span className={`font-medium ${
-                            listing.status === 'Draft' ? 'text-amber-600' : ''
-                          }`}>
-                            {listing.status === 'Draft' ? 'Draft (Offline)' : listing.status}
+                        <div className="p-4">
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <Link href={`/marketplace/${listing.itemId}`}>
+                            <h3 className="font-semibold text-text-primary">{listing.title}</h3>
+                          </Link>
+                          <span className={`px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap ${statusBadgeClass(listing.status)}`}>
+                            {listing.status === 'Draft' ? 'Draft' : listing.status}
                           </span>
-                        </p>
+                        </div>
+                        <div className="flex gap-4 text-sm text-text-secondary mb-4 font-mono tabular-nums">
+                          {listing.priceSale && <span>Sale ₹{listing.priceSale.toLocaleString()}</span>}
+                          {listing.priceRentDaily && <span>Rent ₹{listing.priceRentDaily}/day</span>}
+                        </div>
                         {listing.status === 'Available' && (
                           <div className="space-y-2">
                             <div className="flex gap-2">
@@ -210,8 +246,10 @@ export default function DashboardPage() {
                             </button>
                           </div>
                         )}
+                        </div>
                       </div>
-                    ))}
+                      )
+                    })}
                   </div>
                 )}
               </div>
