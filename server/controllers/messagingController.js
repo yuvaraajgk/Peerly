@@ -1,5 +1,14 @@
 const { supabase } = require('../config/db')
 
+// Postgres TIMESTAMP columns (no time zone) come back from Supabase without a
+// 'Z'/offset suffix (e.g. "2026-07-03T19:06:27.038874"), even though the value
+// is UTC. Without an explicit marker, JS `new Date(...)` parses it as local
+// time on the client, shifting every displayed time by the viewer's UTC offset.
+const toUtcIso = (ts) => {
+  if (!ts) return ts
+  return /[zZ]|[+-]\d{2}:?\d{2}$/.test(ts) ? ts : `${ts}Z`
+}
+
 exports.getConversations = async (req, res) => {
   try {
     const userId = req.user.user_id
@@ -57,9 +66,9 @@ exports.getConversations = async (req, res) => {
           otherUserId,
           otherUserName: otherUserName || null,
           lastMessage: lastMessageData?.message_content || null,
-          lastMessageTime: lastMessageData?.sent_at || null,
+          lastMessageTime: toUtcIso(lastMessageData?.sent_at) || null,
           unreadCount: unreadCount || 0,
-          createdAt: conv.created_at,
+          createdAt: toUtcIso(conv.created_at),
         }
       })
     )
@@ -175,7 +184,7 @@ exports.getMessages = async (req, res) => {
         senderId: msg.sender_id,
         senderName: sender?.display_name || null,
         messageContent: msg.message_content,
-        sentAt: msg.sent_at,
+        sentAt: toUtcIso(msg.sent_at),
         readStatus: msg.read_status,
       }
     })
@@ -225,7 +234,7 @@ exports.sendMessage = async (req, res) => {
         conversationId: messageData.conversation_id,
         senderId: messageData.sender_id,
         messageContent: messageData.message_content,
-        sentAt: messageData.sent_at,
+        sentAt: toUtcIso(messageData.sent_at),
       })
     }
 
@@ -235,7 +244,7 @@ exports.sendMessage = async (req, res) => {
         conversationId: messageData.conversation_id,
         senderId: messageData.sender_id,
         messageContent: messageData.message_content,
-        sentAt: messageData.sent_at,
+        sentAt: toUtcIso(messageData.sent_at),
         readStatus: messageData.read_status,
       },
     })
